@@ -6,9 +6,20 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import TensorDataset, DataLoader
 import argparse
 import os
+import time
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def filter_by_mask(line: str):
+    mask = "0. 1. 1. 1. 0. 0. 1. 1. 1. 1. 0. 1. 1. 0. 0. 1. 1. 1. 1. 1. 1. 1. 1. 1. 0. 0. 1. 1"
+    mask = [int(i) for i in mask.split(".")]
+    for i in range(len(mask)):
+        if mask[i] == 0:
+            target = str(int(i+1))
+            line = line.replace(target, "")
+    return line
 
 
 def generate(name):
@@ -18,6 +29,7 @@ def generate(name):
     with open('data/' + name, 'r') as f:
         for line in f.readlines():
             num_sessions += 1
+            line = filter_by_mask(line)
             line = tuple(map(lambda n: n - 1, map(int, line.strip().split())))
             for i in range(len(line) - window_size):
                 inputs.append(line[i:i + window_size])
@@ -64,6 +76,7 @@ if __name__ == '__main__':
 
     model = Model(input_size, hidden_size, num_layers, num_classes).to(device)
     seq_dataset = generate('hdfs_train')
+    # seq_dataset = generate('hdfs_test_normal')
     dataloader = DataLoader(seq_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
     writer = SummaryWriter(log_dir='log/' + log)
 
@@ -88,6 +101,8 @@ if __name__ == '__main__':
             train_loss += loss.item()
             optimizer.step()
             writer.add_graph(model, seq)
+            if step != 0 and step%10 == 0:
+                torch.save(model.state_dict(), model_dir + '/' + log + '.pt')
         print('Epoch [{}/{}], train_loss: {:.4f}'.format(epoch + 1, num_epochs, train_loss / total_step))
         writer.add_scalar('train_loss', train_loss / total_step, epoch + 1)
     elapsed_time = time.time() - start_time
