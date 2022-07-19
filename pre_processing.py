@@ -33,5 +33,32 @@ def main():
                 w.write(one_hot_str+"\n")
 
 
+def filter_by_mask(line: str):
+    mask = "0. 1. 1. 1. 0. 0. 1. 1. 1. 1. 0. 1. 1. 0. 0. 1. 1. 1. 1. 1. 1. 1. 1. 1. 0. 0. 1. 1"
+    mask = [int(i) for i in mask.split(".")]
+    line_list = line.split()
+    for i in range(len(mask)):
+        if mask[i] == 0:
+            target = str(int(i+1))
+            for j in range(len(line_list)):
+                if line_list[j] == target:
+                    line_list[j] = ""
+    return " ".join(line_list)
+
+
+def filter_data():
+    # with open("data/hdfs_test_abnormal_filtered", "w") as w:
+    # with open("data/hdfs_test_normal_filtered", "w") as w:
+    with open("data/hdfs_train_filtered", "w") as w:
+    #     with open("data/hdfs_test_abnormal") as f:
+    #     with open("data/hdfs_test_normal") as f:
+        with open("data/hdfs_train") as f:
+            lines = f.readlines()
+            for line in lines:
+                alt_line = filter_by_mask(line)
+                w.write(alt_line+"\n")
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+    filter_data()

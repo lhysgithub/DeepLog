@@ -12,11 +12,14 @@ device = torch.device("cpu")
 def filter_by_mask(line: str):
     mask = "0. 1. 1. 1. 0. 0. 1. 1. 1. 1. 0. 1. 1. 0. 0. 1. 1. 1. 1. 1. 1. 1. 1. 1. 0. 0. 1. 1"
     mask = [int(i) for i in mask.split(".")]
+    line_list = line.split()
     for i in range(len(mask)):
         if mask[i] == 0:
             target = str(int(i+1))
-            line = line.replace(target, "")
-    return line
+            for j in range(len(line_list)):
+                if line_list[j] == target:
+                    line_list[j] = ""
+    return " ".join(line_list)
 
 
 def generate(name):
@@ -105,8 +108,8 @@ if __name__ == '__main__':
                     flag = True
                     FP += 1
                     break
-            if flag:
-                record_abnormal_one_hot(line, num_classes)
+            # if flag:
+            #     record_abnormal_one_hot(line, num_classes)
     with torch.no_grad():
         for line in test_abnormal_loader:
             flag = False
@@ -121,8 +124,8 @@ if __name__ == '__main__':
                     flag = True
                     TP += 1
                     break
-            if flag:
-                record_abnormal_one_hot(line, num_classes)
+            # if flag:
+            #     record_abnormal_one_hot(line, num_classes)
     elapsed_time = time.time() - start_time
     print('elapsed_time: {:.3f}s'.format(elapsed_time))
     # Compute precision, recall and F1-measure

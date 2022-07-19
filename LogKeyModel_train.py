@@ -15,11 +15,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def filter_by_mask(line: str):
     mask = "0. 1. 1. 1. 0. 0. 1. 1. 1. 1. 0. 1. 1. 0. 0. 1. 1. 1. 1. 1. 1. 1. 1. 1. 0. 0. 1. 1"
     mask = [int(i) for i in mask.split(".")]
+    line_list = line.split()
     for i in range(len(mask)):
         if mask[i] == 0:
             target = str(int(i+1))
-            line = line.replace(target, "")
-    return line
+            for j in range(len(line_list)):
+                if line_list[j] == target:
+                    line_list[j] = ""
+    return " ".join(line_list)
 
 
 def generate(name):
